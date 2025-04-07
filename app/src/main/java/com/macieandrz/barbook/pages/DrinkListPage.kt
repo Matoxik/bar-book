@@ -3,6 +3,7 @@ package com.macieandrz.barbook.pages
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -83,7 +84,7 @@ fun DrinkListPage(
                     contentPadding = PaddingValues(8.dp),
                 ) {
                     items(drinks) { drink ->
-                        DrinkCard(drink = drink)
+                        DrinkCard(drink = drink, navController = navController, drinkListViewModel)
                     }
                 }
             } else {
@@ -100,28 +101,33 @@ fun DrinkListPage(
 }
 
 @Composable
-fun DrinkCard(drink: Drink) {
+fun DrinkCard(drink: Drink, navController: NavController, drinkListViewModel: DrinkListViewModel ) {
     Card(
         modifier = Modifier
             .padding(4.dp)
             .fillMaxWidth()
             .heightIn(min = 180.dp),
         shape = RoundedCornerShape(8.dp),
+        onClick = {
+            navController.navigate(DrinkRoute)
+            drinkListViewModel.setCurrentDrink(drink.strDrink)
+        }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Wyświetlanie zdjęcia drinka
             drink.strDrinkThumb?.let { imageUrl ->
-                Log.d("DEBUG", "ImageUrl: $imageUrl")
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = drink.strDrink,
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxWidth()
+                        .aspectRatio(1f), // proporcja 1:1 dla obrazów na liście
                     contentScale = ContentScale.Crop
                 )
             }
+
 
             // Wyświetlanie nazwy drinka
             Text(

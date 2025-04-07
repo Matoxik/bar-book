@@ -19,6 +19,9 @@ class DrinkListViewModel(app: Application) : AndroidViewModel(app){
     private val _drinkList = MutableStateFlow<DrinkList?>(null)
     val drinkList = _drinkList.asStateFlow()
 
+    private val _currentDrink = MutableStateFlow<String?>(null)
+    val currentDrink = _currentDrink.asStateFlow()
+
     fun performFetchDrinkList(drinkName: String) = viewModelScope.launch {
 
         try {
@@ -37,4 +40,10 @@ class DrinkListViewModel(app: Application) : AndroidViewModel(app){
             Log.e("DEBUG", "DrinkList API Request Failed", e)
         }
     }
+
+    fun setCurrentDrink(currentDrink: String) {
+        _currentDrink.update { currentDrink }
+    }
+
+
 }
