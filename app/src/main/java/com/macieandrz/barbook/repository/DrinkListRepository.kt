@@ -13,4 +13,9 @@ class DrinkListRepository(context: Context) {
         return drinkListApi.getDrinkList(drinkName)
     }
 
+    suspend fun loadAllDrinkList(firstLetter: String): Response<DrinkList> {
+        return drinkListApi.getDrinkList(firstLetter)
+    }
+
+
 }

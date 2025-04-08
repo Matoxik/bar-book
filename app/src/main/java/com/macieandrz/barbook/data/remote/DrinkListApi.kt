@@ -9,11 +9,16 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface DrinkListApi {
-    //https://www.thecocktaildb.com/api/json/v1/1/search.php?s=margarita
+    //https://www.thecocktaildb.com/api/json/v1/1/search.php?a=margarita
 
     @GET("search.php")
     suspend fun getDrinkList(
         @Query("s") drinkName: String,
+    ) : Response<DrinkList>
+
+    @GET("search.php")
+    suspend fun getAllDrinkList(
+        @Query("f") firstLetter: String,
     ) : Response<DrinkList>
 
 }

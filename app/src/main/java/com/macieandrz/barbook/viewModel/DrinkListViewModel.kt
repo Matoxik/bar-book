@@ -28,7 +28,7 @@ class DrinkListViewModel(app: Application) : AndroidViewModel(app){
             val remote = repo.loadDrinkList(drinkName.trim().lowercase())
             if (remote.isSuccessful) {
                 val data = remote.body()
-                Log.d("DEBUG", "Fetched drink data: $data")
+                Log.d("DEBUG", "Fetched drink data: drinkName")
                 if (data != null) {
                    _drinkList.update { data }
                 }
@@ -40,6 +40,27 @@ class DrinkListViewModel(app: Application) : AndroidViewModel(app){
             Log.e("DEBUG", "DrinkList API Request Failed", e)
         }
     }
+
+    //loadAllDrinkList
+    fun performFetchAllDrinkList(firstLetter: String) = viewModelScope.launch {
+        try {
+            val remote = repo.loadAllDrinkList(firstLetter.trim().lowercase())
+            if (remote.isSuccessful) {
+                val data = remote.body()
+                Log.d("DEBUG", "Fetched drink data: firstLetter ")
+                if (data != null) {
+                    _drinkList.update { data }
+                }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(getApplication<Application>(), "Try connect to internet",
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.e("DEBUG", "DrinkList API Request Failed", e)
+        }
+    }
+
+
 
     fun setCurrentDrink(currentDrink: String) {
         _currentDrink.update { currentDrink }

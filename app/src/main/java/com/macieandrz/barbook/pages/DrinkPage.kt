@@ -52,6 +52,8 @@ fun DrinkPage(
     }
     }
 
+
+
    Column(horizontalAlignment = Alignment.CenterHorizontally) {
        Spacer(modifier = Modifier.height(50.dp))
 

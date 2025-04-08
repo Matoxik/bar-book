@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,11 @@ fun DrinkListPage(
 ) {
     var drinkName by remember { mutableStateOf("") }
     val drinkList by drinkListViewModel.drinkList.collectAsState(null)
+
+
+    LaunchedEffect(Unit) {
+        drinkListViewModel.performFetchAllDrinkList("a")
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Pole wyszukiwania nazwy drinka
