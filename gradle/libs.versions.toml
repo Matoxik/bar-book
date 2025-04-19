@@ -17,7 +17,9 @@ moshiKotlinCodegen = "1.15.2"
 navigationCompose = "2.8.9"
 retrofit = "2.11.0"
 workRuntimeKtx = "2.10.0"
+constraintlayoutComposeAndroid = "1.1.1"
 kotlinxSerializationJson = "1.7.1"
+
 
 
 [libraries]
@@ -46,7 +48,9 @@ material3 = { module = "androidx.compose.material3:material3" }
 moshi = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 moshi-kotlin-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshiKotlinCodegen" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-constraintlayout-compose-android = { group = "androidx.constraintlayout", name = "constraintlayout-compose-android", version.ref = "constraintlayoutComposeAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

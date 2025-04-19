@@ -70,7 +70,7 @@ fun DrinkPage(
            contentDescription = actualDrink?.strDrink,
            modifier = Modifier
                .fillMaxWidth()
-               .aspectRatio(1.4f), // ta sama proporcja dla spójności
+               .aspectRatio(1.4f),
            contentScale = ContentScale.Crop
        )
 

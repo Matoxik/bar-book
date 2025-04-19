@@ -46,6 +46,7 @@ dependencies {
     // Kotlin + coroutines
     implementation(libs.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.constraintlayout.compose.android)
 
     // Retrofit + moshi
     ksp(libs.moshi.kotlin.codegen)

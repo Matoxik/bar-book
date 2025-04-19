@@ -5,10 +5,16 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.macieandrz.barbook.pages.ChallengePage
+import com.macieandrz.barbook.pages.ChallengeRoute
 import com.macieandrz.barbook.pages.DrinkListPage
 import com.macieandrz.barbook.pages.DrinkListRoute
 import com.macieandrz.barbook.pages.DrinkPage
 import com.macieandrz.barbook.pages.DrinkRoute
+import com.macieandrz.barbook.pages.HomePage
+import com.macieandrz.barbook.pages.HomeRoute
+import com.macieandrz.barbook.pages.ShopListPage
+import com.macieandrz.barbook.pages.ShopListRoute
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
 
 @Composable
@@ -20,13 +26,22 @@ fun Navigation(
     val navController = rememberNavController()
 
     NavHost(
-        navController = navController, startDestination = DrinkListRoute
+        navController = navController, startDestination = HomeRoute
     ) {
+        composable<HomeRoute> {
+            HomePage(modifier, navController)
+        }
         composable<DrinkListRoute> {
             DrinkListPage(modifier, navController, drinkListViewModel)
         }
         composable<DrinkRoute> {
            DrinkPage(modifier, navController, drinkListViewModel)
+        }
+        composable<ShopListRoute> {
+            ShopListPage(modifier, navController, drinkListViewModel)
+        }
+        composable<ChallengeRoute> {
+            ChallengePage(modifier, navController, drinkListViewModel)
         }
     }
 }

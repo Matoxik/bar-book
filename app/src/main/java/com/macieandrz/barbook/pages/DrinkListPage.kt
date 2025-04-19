@@ -1,6 +1,8 @@
 package com.macieandrz.barbook.pages
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,8 +17,13 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.macieandrz.barbook.data.models.Drink
@@ -38,6 +46,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 object DrinkListRoute
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrinkListPage(
     modifier: Modifier = Modifier,
@@ -52,97 +61,136 @@ fun DrinkListPage(
         drinkListViewModel.performFetchAllDrinkList("a")
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Pole wyszukiwania nazwy drinka
-        TextField(
-            value = drinkName,
-            onValueChange = { drinkName = it },
-            label = { Text("Drink name") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-
-        // Przycisk wyszukiwania
-        Button(
-            onClick = {
-                if (drinkName.isNotBlank()) {
-                    drinkListViewModel.performFetchDrinkList(drinkName)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            shape = CutCornerShape(8.dp)
-        ) {
-            Text("Search")
-        }
-
-
-        // Wyświetlanie siatki drinków
-        drinkList?.drinks?.let { drinks ->
-            if (drinks.isNotEmpty()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    contentPadding = PaddingValues(8.dp),
-                ) {
-                    items(drinks) { drink ->
-                        DrinkCard(drink = drink, navController = navController, drinkListViewModel)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Menu",
+                            fontSize = 28.sp
+                        )
                     }
                 }
-            } else {
+            )
+        },
+      //  bottomBar = {
+//            BottomNavigationBar(
+//                navController = navController,
+//                actualPosition = "GalleryPage"
+//         )
+      //  }
+    ) { paddingValues ->
+
+        Column(modifier = Modifier
+            .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(16.dp),) {
+            // Pole wyszukiwania nazwy drinka
+            TextField(
+                value = drinkName,
+                onValueChange = { drinkName = it },
+                label = { Text("Drink name") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            // Przycisk wyszukiwania
+            Button(
+                onClick = {
+                    if (drinkName.isNotBlank()) {
+                        drinkListViewModel.performFetchDrinkList(drinkName)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text("Search")
+            }
+
+
+            // Wyświetlanie siatki drinków
+            drinkList?.drinks?.let { drinks ->
+                if (drinks.isNotEmpty()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        contentPadding = PaddingValues(8.dp),
+                    ) {
+                        items(drinks) { drink ->
+                            DrinkCard(
+                                drink = drink,
+                                navController = navController,
+                                drinkListViewModel
+                            )
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Nie znaleziono drinków",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+    @Composable
+    fun DrinkCard(
+        drink: Drink,
+        navController: NavController,
+        drinkListViewModel: DrinkListViewModel
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth()
+                .heightIn(min = 180.dp),
+            shape = RoundedCornerShape(8.dp),
+            onClick = {
+                navController.navigate(DrinkRoute)
+                drinkListViewModel.setCurrentDrink(drink.strDrink)
+            }
+
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Wyświetlanie zdjęcia drinka
+                drink.strDrinkThumb?.let { imageUrl ->
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = drink.strDrink,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+
+                // Wyświetlanie nazwy drinka
                 Text(
-                    text = "Nie znaleziono drinków",
+                    text = drink.strDrink,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(8.dp),
                     textAlign = TextAlign.Center
                 )
             }
         }
     }
-}
-
-@Composable
-fun DrinkCard(drink: Drink, navController: NavController, drinkListViewModel: DrinkListViewModel ) {
-    Card(
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth()
-            .heightIn(min = 180.dp),
-        shape = RoundedCornerShape(8.dp),
-        onClick = {
-            navController.navigate(DrinkRoute)
-            drinkListViewModel.setCurrentDrink(drink.strDrink)
-        }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Wyświetlanie zdjęcia drinka
-            drink.strDrinkThumb?.let { imageUrl ->
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = drink.strDrink,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f), // proporcja 1:1 dla obrazów na liście
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-
-            // Wyświetlanie nazwy drinka
-            Text(
-                text = drink.strDrink,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
