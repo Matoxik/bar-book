@@ -10,7 +10,7 @@ val DarkGray = Color(0xFF474747) // Ciemnoszary - kolor tła
 // Pochodne kolory dla Light Theme
 val LightPrimaryContainer = Color(0xFFFFDAD6) // Jaśniejsza wersja Claret
 val LightOnPrimary = Color.White
-val LightOnPrimaryContainer = Color(0xFF410002)
+val LightOnPrimaryContainer = Color.White
 val LightOnSecondary = Color.White
 val LightOnSecondaryContainer = Color(0xFF3E0022)
 val LightSecondaryContainer = Color(0xFFFFD9E3) // Jaśniejsza wersja LightPink
@@ -22,7 +22,7 @@ val LightOnBackground = Color(0xFF1F1B16)
 // Pochodne kolory dla Dark Theme
 val DarkOnPrimary = Color.White
 val DarkPrimaryContainer = Color(0xFF930015) // Ciemniejsza wersja Claret
-val DarkOnPrimaryContainer = Color(0xFFFFDAD6)
+val DarkOnPrimaryContainer = Color.Black
 val DarkSecondary = Color(0xFFFFB1CC) // Ciemniejsza wersja LightPink
 val DarkOnSecondary = Color.Black
 val DarkSecondaryContainer = Color(0xFFC35585) // Jeszcze ciemniejsza wersja LightPink
@@ -33,6 +33,9 @@ val DarkBackground = DarkGray // Używamy bezpośrednio zdefiniowanego koloru t�
 val DarkOnBackground = Color.White
 
 // Icons
+val homeBackground = Color(0xFFFFEBEE)
+val homeTint = Color(0xFFFF6B6B)
+
 val menuBackground = Color(0xFFE1F5FE)
 val menuTint = Color(0xFF4FC3F7)
 

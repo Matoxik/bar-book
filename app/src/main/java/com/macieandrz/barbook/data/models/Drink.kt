@@ -45,22 +45,22 @@ data class Drink(
     val strIngredient1: String?,
 
     @Json(name = "strIngredient10")
-    val strIngredient10: Any?,
+    val strIngredient10: String?,
 
     @Json(name = "strIngredient11")
-    val strIngredient11: Any?,
+    val strIngredient11: String?,
 
     @Json(name = "strIngredient12")
-    val strIngredient12: Any?,
+    val strIngredient12: String?,
 
     @Json(name = "strIngredient13")
-    val strIngredient13: Any?,
+    val strIngredient13: String?,
 
     @Json(name = "strIngredient14")
-    val strIngredient14: Any?,
+    val strIngredient14: String?,
 
     @Json(name = "strIngredient15")
-    val strIngredient15: Any?,
+    val strIngredient15: String?,
 
     @Json(name = "strIngredient2")
     val strIngredient2: String?,
@@ -81,10 +81,10 @@ data class Drink(
     val strIngredient7: String?,
 
     @Json(name = "strIngredient8")
-    val strIngredient8: Any?,
+    val strIngredient8: String?,
 
     @Json(name = "strIngredient9")
-    val strIngredient9: Any?,
+    val strIngredient9: String?,
 
     @Json(name = "strInstructions")
     val strInstructions: String?,

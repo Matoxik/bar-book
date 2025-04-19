@@ -187,7 +187,7 @@ fun HomePage(
                             }
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "Shop list",
+                                text = "Shopping list",
                                 fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )

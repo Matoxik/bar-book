@@ -34,12 +34,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.macieandrz.barbook.data.models.Drink
+import com.macieandrz.barbook.ui.element.BottomNavigationBar
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import kotlinx.serialization.Serializable
 
@@ -66,8 +68,8 @@ fun DrinkListPage(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 title = {
                     Box(
@@ -76,23 +78,24 @@ fun DrinkListPage(
                     ) {
                         Text(
                             "Menu",
-                            fontSize = 28.sp
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
             )
         },
-      //  bottomBar = {
-//            BottomNavigationBar(
-//                navController = navController,
-//                actualPosition = "GalleryPage"
-//         )
-      //  }
+        bottomBar = {
+            BottomNavigationBar(
+                navController = navController,
+                actualPosition = "DrinkListPage"
+         )
+        }
     ) { paddingValues ->
 
         Column(modifier = Modifier
             .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(16.dp),) {
+        ) {
             // Pole wyszukiwania nazwy drinka
             TextField(
                 value = drinkName,
