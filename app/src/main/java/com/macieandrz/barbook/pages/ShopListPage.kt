@@ -85,7 +85,6 @@ fun ShopListPage(
 ) {
 
     Scaffold(
-        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 colors = topAppBarColors(

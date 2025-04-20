@@ -58,7 +58,6 @@ fun DrinkPage(
     }
 
     Scaffold(
-        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(

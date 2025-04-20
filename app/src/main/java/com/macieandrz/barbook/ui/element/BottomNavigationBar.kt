@@ -3,6 +3,8 @@ package com.macieandrz.barbook.ui.element
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -52,8 +54,35 @@ fun BottomNavigationBar(
     actualPosition: String
 ) {
     NavigationBar(modifier = modifier,
-        windowInsets = WindowInsets(0, 0, 0, 0)
+        windowInsets = WindowInsets(0, 0, 0, 144)
     ) {
+        // Home
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                navController.navigate(HomeRoute)
+            },
+            label = {
+                Text("Home")
+            },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(homeBackground),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "Home Icon",
+                        tint = homeTint
+                    )
+                }
+            }
+        )
+
+
         // Menu
         NavigationBarItem(
             selected = actualPosition == "DrinkListPage",
@@ -141,31 +170,6 @@ fun BottomNavigationBar(
         )
 
 
-        // Home
-        NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate(HomeRoute)
-            },
-            label = {
-                Text("Home")
-            },
-            icon = {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(homeBackground),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Home,
-                        contentDescription = "Home Icon",
-                        tint = homeTint
-                    )
-                }
-            }
-        )
 
     }
 }

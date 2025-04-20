@@ -1,5 +1,6 @@
 package com.macieandrz.barbook.pages
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,6 +68,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.launch
 
 @Serializable
@@ -90,6 +92,8 @@ fun DrinkListPage(
     var selectedAlcohol by remember { mutableStateOf<String?>(null) }
     var selectedIngredient by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+
 
     LaunchedEffect(Unit) {
         drinkListViewModel.performFetchAllDrinkList("a")
@@ -234,7 +238,6 @@ fun DrinkListPage(
         }
     ) {
         Scaffold(
-            modifier = modifier,
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = topAppBarColors(
@@ -284,7 +287,11 @@ fun DrinkListPage(
             }
         ) { paddingValues ->
             Column(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Pole wyszukiwania nazwy drinka
                 TextField(

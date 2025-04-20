@@ -13,12 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.macieandrz.barbook.ui.theme.BarBookTheme
+import com.macieandrz.barbook.viewModel.ChallengeViewModel
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import com.macieandrz.barbook.viewModel.ShopListViewModel
 
 class MainActivity : ComponentActivity() {
     private val drinkListViewModel by viewModels<DrinkListViewModel>()
     private val shopListViewModel by viewModels<ShopListViewModel>()
+    private val challengeViewModel by viewModels<ChallengeViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,8 @@ class MainActivity : ComponentActivity() {
           Navigation(
               modifier = Modifier.padding(innerPadding),
               drinkListViewModel = drinkListViewModel,
-              shopListViewModel = shopListViewModel
+              shopListViewModel = shopListViewModel,
+              challengeViewModel = challengeViewModel
           )
                 }
             }

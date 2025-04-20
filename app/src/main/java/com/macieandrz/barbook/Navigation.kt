@@ -15,6 +15,7 @@ import com.macieandrz.barbook.pages.HomePage
 import com.macieandrz.barbook.pages.HomeRoute
 import com.macieandrz.barbook.pages.ShopListPage
 import com.macieandrz.barbook.pages.ShopListRoute
+import com.macieandrz.barbook.viewModel.ChallengeViewModel
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import com.macieandrz.barbook.viewModel.ShopListViewModel
 
@@ -22,7 +23,8 @@ import com.macieandrz.barbook.viewModel.ShopListViewModel
 fun Navigation(
     modifier: Modifier = Modifier,
     drinkListViewModel: DrinkListViewModel,
-    shopListViewModel: ShopListViewModel
+    shopListViewModel: ShopListViewModel,
+    challengeViewModel: ChallengeViewModel
 
 ) {
     val navController = rememberNavController()
@@ -43,7 +45,7 @@ fun Navigation(
             ShopListPage(modifier, navController, shopListViewModel)
         }
         composable<ChallengeRoute> {
-            ChallengePage(modifier, navController, drinkListViewModel)
+            ChallengePage(modifier, navController, challengeViewModel)
         }
     }
 }
