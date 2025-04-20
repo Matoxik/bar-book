@@ -1,6 +1,7 @@
 package com.macieandrz.barbook.pages
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,28 @@ import com.macieandrz.barbook.data.models.Drink
 import com.macieandrz.barbook.ui.element.BottomNavigationBar
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import kotlinx.serialization.Serializable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.launch
 
 @Serializable
 object DrinkListRoute
@@ -58,100 +81,273 @@ fun DrinkListPage(
     var drinkName by remember { mutableStateOf("") }
     val drinkList by drinkListViewModel.drinkList.collectAsState(null)
 
+    // Drawer state
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    // Filter selections
+    var selectedAlcohol by remember { mutableStateOf<String?>(null) }
+    var selectedIngredient by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         drinkListViewModel.performFetchAllDrinkList("a")
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Menu",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(
-                navController = navController,
-                actualPosition = "DrinkListPage"
-         )
-        }
-    ) { paddingValues ->
-
-        Column(modifier = Modifier
-            .padding(paddingValues),
-        ) {
-            // Pole wyszukiwania nazwy drinka
-            TextField(
-                value = drinkName,
-                onValueChange = { drinkName = it },
-                label = { Text("Drink name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-
-            // Przycisk wyszukiwania
-            Button(
-                onClick = {
-                    if (drinkName.isNotBlank()) {
-                        drinkListViewModel.performFetchDrinkList(drinkName)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = MaterialTheme.colorScheme.background
             ) {
-                Text("Search")
-            }
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        "Filter Drinks",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
 
+                    // Sekcja 1: Alcohol
+                    Text(
+                        "Alcohol",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
 
-            // Wyświetlanie siatki drinków
-            drinkList?.drinks?.let { drinks ->
-                if (drinks.isNotEmpty()) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        contentPadding = PaddingValues(8.dp),
-                    ) {
-                        items(drinks) { drink ->
-                            DrinkCard(
-                                drink = drink,
-                                navController = navController,
-                                drinkListViewModel
+                    val alcoholOptions = listOf("Yes", "No", "Optional")
+                    alcoholOptions.forEach { option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = selectedAlcohol == option,
+                                    onClick = { selectedAlcohol = option }
+                                )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedAlcohol == option,
+                                onClick = { selectedAlcohol = option }
+                            )
+                            Text(
+                                text = option,
+                                modifier = Modifier.padding(start = 8.dp)
                             )
                         }
                     }
-                } else {
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    // Sekcja 2: Ingredients
                     Text(
-                        text = "Nie znaleziono drinków",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
+                        "Ingredients",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
+
+                    val ingredientOptions = listOf("Vodka", "Rum", "Tequila", "Bourbon", "Red wine", "Whiskey", "None")
+                    ingredientOptions.forEach { option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = selectedIngredient == option,
+                                    onClick = { selectedIngredient = option }
+                                )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedIngredient == option,
+                                onClick = { selectedIngredient = option }
+                            )
+                            Text(
+                                text = option,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    // Sekcja 3: Category
+                    Text(
+                        "Category",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    val categoryOptions = listOf(
+                        "Cocktail", "Ordinary Drink", "Punch / Party Drink", "Cocoa",
+                        "Shot", "Coffee / Tea", "Homemade Liqueur", "Beer", "Soft Drink", "None"
+                    )
+                    categoryOptions.forEach { option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = selectedCategory == option,
+                                    onClick = { selectedCategory = option }
+                                )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedCategory == option,
+                                onClick = { selectedCategory = option }
+                            )
+                            Text(
+                                text = option,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Przycisk "Filter"
+                    Button(
+                        onClick = {
+                            // Wywołanie funkcji filtrowania
+                            drinkListViewModel.performFetchFilteredDrinkList(selectedAlcohol, selectedCategory, selectedIngredient)
+                            // Zamknięcie navigation drawer
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Filter")
+                    }
+                }
+            }
+        }
+    ) {
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                TopAppBar(
+                    colors = topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                    title = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Menu",
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                if (drawerState.isClosed) {
+                                    drawerState.open()
+                                } else {
+                                    drawerState.close()
+                                }
+                            }
+                        }) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = "Menu Icon",
+                                    modifier = Modifier.size(32.dp),
+                                    tint = MaterialTheme.colorScheme.surfaceTint //onSecondary
+                                )
+                            }
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                BottomNavigationBar(
+                    navController = navController,
+                    actualPosition = "DrinkListPage"
+                )
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier.padding(paddingValues),
+            ) {
+                // Pole wyszukiwania nazwy drinka
+                TextField(
+                    value = drinkName,
+                    onValueChange = { drinkName = it },
+                    label = { Text("Drink name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+
+                // Przycisk wyszukiwania
+                Button(
+                    onClick = {
+                        if (drinkName.isNotBlank()) {
+                            drinkListViewModel.performFetchDrinkList(drinkName)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text("Search")
+                }
+
+                // Wyświetlanie siatki drinków
+                drinkList?.drinks?.let { drinks ->
+                    if (drinks.isNotEmpty()) {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            contentPadding = PaddingValues(8.dp),
+                        ) {
+                            items(drinks) { drink ->
+                                DrinkCard(
+                                    drink = drink,
+                                    navController = navController,
+                                    drinkListViewModel = drinkListViewModel
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "No drinks found",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+
     @Composable
     fun DrinkCard(
         drink: Drink,

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ fun DrinkPage(
 ) {
     val currentDrink by drinkListViewModel.currentDrink.collectAsState(null)
     val drinkList by drinkListViewModel.drinkList.collectAsState(null)
+
 
     var actualDrink: Drink? = null
     drinkList?.drinks?.let { drinks ->
