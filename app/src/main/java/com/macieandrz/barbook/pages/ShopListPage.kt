@@ -1,5 +1,11 @@
 package com.macieandrz.barbook.pages
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,11 +55,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.macieandrz.barbook.R
 import com.macieandrz.barbook.ui.element.BottomNavigationBar
@@ -60,6 +71,7 @@ import com.macieandrz.barbook.viewModel.DrinkWithPortions
 import com.macieandrz.barbook.viewModel.ShopListViewModel
 import com.macieandrz.barbook.viewModel.ShoppingIngredient
 import kotlinx.serialization.Serializable
+import androidx.core.net.toUri
 
 @Serializable
 object ShopListRoute
@@ -71,50 +83,38 @@ fun ShopListPage(
     navController: NavController,
     shopListViewModel: ShopListViewModel
 ) {
-    var drinkName by rememberSaveable { mutableStateOf("") }
-    val drinkList by shopListViewModel.drinkList.collectAsState(null)
-
-    // State for selected drinks and their portions
-    var selectedDrinks by rememberSaveable { mutableStateOf(listOf<DrinkWithPortions>()) }
-
-    // State for required ingredients with checkboxes
-    var shoppingIngredients by rememberSaveable { mutableStateOf(listOf<ShoppingIngredient>()) }
-
-    // Update drinks when API returns results
-    LaunchedEffect(drinkList) {
-        drinkList?.drinks?.firstOrNull()?.let { newDrink ->
-            if (selectedDrinks.none { it.drink.idDrink == newDrink.idDrink }) {
-                selectedDrinks = selectedDrinks + DrinkWithPortions(newDrink)
-            }
-        }
-    }
-
-    // Update ingredients when selected drinks change
-    LaunchedEffect(selectedDrinks) {
-        shoppingIngredients = calculateRequiredIngredients(selectedDrinks)
-    }
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
+            CenterAlignedTopAppBar(
+                colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
                         Text(
                             "Shopping list",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold
                         )
-                    }
                 }
             )
+        },
+        floatingActionButton = {
+            val context = LocalContext.current
+            FloatingActionButton(
+                onClick = {
+                    sendUncheckedIngredientsViaSMS(context, shopListViewModel.shoppingIngredients)
+                },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.baseline_sms),
+                    contentDescription = "Send SMS with ingredients"
+                )
+            }
         },
         bottomBar = {
             BottomNavigationBar(
@@ -123,65 +123,52 @@ fun ShopListPage(
             )
         }
     ) { paddingValues ->
+     Box( modifier = Modifier
+         .fillMaxSize()
+         .padding(paddingValues)) {
+
         Column(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.fillMaxSize(),
         ) {
             // Drink search and add section
             Column(modifier = Modifier.padding(16.dp)) {
                 TextField(
-                    value = drinkName,
-                    onValueChange = { drinkName = it },
+                    value = shopListViewModel.drinkName,
+                    onValueChange = { shopListViewModel.updateDrinkName(it) },
                     label = { Text("Drink name") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Button(
-                    onClick = {
-                        if (drinkName.isNotBlank()) {
-                            shopListViewModel.performFetchDrinkList(drinkName)
-                            drinkName = ""
-                        }
-                    },
+                    onClick = { shopListViewModel.performFetchDrinkList() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Add")
                 }
             }
 
-            // Drinks list with swipe-to-dismiss functionality
+            // Lista drinków używająca stanów z ViewModelu
             DrinksList(
-                selectedDrinks = selectedDrinks,
+                selectedDrinks = shopListViewModel.selectedDrinks,
                 onRemoveDrink = { drink ->
-                    selectedDrinks = selectedDrinks.filter { it.drink.idDrink != drink.drink.idDrink }
+                    shopListViewModel.removeDrink(drink)
                 },
                 onUpdatePortions = { drink, newPortions ->
-                    selectedDrinks = selectedDrinks.map {
-                        if (it.drink.idDrink == drink.drink.idDrink) {
-                            it.copy(portions = newPortions)
-                        } else {
-                            it
-                        }
-                    }
+                    shopListViewModel.updateDrinkPortions(drink, newPortions)
                 }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Required ingredients section
+            // Karta składników używająca stanów z ViewModelu
             RequiredIngredientsCard(
-                ingredients = shoppingIngredients,
+                ingredients = shopListViewModel.shoppingIngredients,
                 onCheckedChange = { ingredient, isChecked ->
-                    shoppingIngredients = shoppingIngredients.map {
-                        if (it.name == ingredient.name) {
-                            it.copy(isChecked = isChecked)
-                        } else {
-                            it
-                        }
-                    }
+                    shopListViewModel.updateIngredientChecked(ingredient, isChecked)
                 }
             )
+         }
         }
     }
 }
@@ -321,6 +308,7 @@ fun RequiredIngredientsCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(bottom = 16.dp)
             .padding(horizontal = 16.dp)
             .heightIn(max = 230.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -376,53 +364,49 @@ fun RequiredIngredientsCard(
                 }
             }
         }
+
     }
 }
 
-private fun calculateRequiredIngredients(selectedDrinks: List<DrinkWithPortions>): List<ShoppingIngredient> {
-    val ingredientMap = mutableMapOf<String, MutableList<String>>()
 
-    for (drinkWithPortions in selectedDrinks) {
-        val drink = drinkWithPortions.drink
-        val portions = drinkWithPortions.portions
+private fun sendUncheckedIngredientsViaSMS(
+    context: Context,
+    ingredients: List<ShoppingIngredient>
+) {
 
-        // Helper function to process an ingredient and its measure
-        fun addIngredient(ingredient: String?, measure: String?) {
-            if (!ingredient.isNullOrBlank() && ingredient != "null") {
-                val measureStr = when {
-                    measure == null || measure == "null" -> "as needed"
-                    portions > 1 -> "$portions x $measure"
-                    else -> measure.toString()
-                }
+    // Filtruj tylko niezaznaczone składniki
+    val uncheckedIngredients = ingredients.filter { !it.isChecked }
 
-                val ingredientList = ingredientMap.getOrPut(ingredient) { mutableListOf() }
-                ingredientList.add(measureStr)
-            }
-        }
-
-        // Process all ingredients for this drink
-        addIngredient(drink.strIngredient1, drink.strMeasure1)
-        addIngredient(drink.strIngredient2, drink.strMeasure2)
-        addIngredient(drink.strIngredient3, drink.strMeasure3)
-        addIngredient(drink.strIngredient4, drink.strMeasure4)
-        addIngredient(drink.strIngredient5, drink.strMeasure5)
-        addIngredient(drink.strIngredient6, drink.strMeasure6)
-        addIngredient(drink.strIngredient7, drink.strMeasure7)
-        addIngredient(drink.strIngredient8, drink.strMeasure8)
-        addIngredient(drink.strIngredient9, drink.strMeasure9)
-        addIngredient(drink.strIngredient10, drink.strMeasure10)
-        addIngredient(drink.strIngredient11, drink.strMeasure11)
-        addIngredient(drink.strIngredient12, drink.strMeasure12)
-        addIngredient(drink.strIngredient13, drink.strMeasure13)
-        addIngredient(drink.strIngredient14, drink.strMeasure14)
-        addIngredient(drink.strIngredient15, drink.strMeasure15)
+    if (uncheckedIngredients.isEmpty()) {
+        Toast.makeText(
+            context,
+            "There are no items selected to be sent",
+            Toast.LENGTH_SHORT
+        ).show()
+        return
     }
 
-    // Convert map to sorted list of ShoppingIngredient objects
-    return ingredientMap.map { (name, measures) ->
-        ShoppingIngredient(
-            name = name,
-            measure = measures.joinToString(", ")
-        )
-    }.sortedBy { it.name }
+    // Budowanie treści SMS
+    val smsBody = buildString {
+        append("Lista zakupów:\n")
+        uncheckedIngredients.forEachIndexed { index, ingredient ->
+            append("${index + 1}. ${ingredient.name} - ${ingredient.measure}\n")
+        }
+    }
+
+    try {
+        // Użycie Intenta do otwarcia aplikacji SMS z gotową treścią
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = "sms:".toUri()
+            putExtra("sms_body", smsBody)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        Toast.makeText(
+            context,
+            "Cannot send SMS: ${e.message}",
+            Toast.LENGTH_LONG
+        ).show()
+    }
 }

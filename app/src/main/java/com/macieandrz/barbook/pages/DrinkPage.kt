@@ -60,16 +60,12 @@ fun DrinkPage(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.surface,
                 ),
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
                         actualDrink?.let {
                             Text(
                                 it.strDrink,
@@ -77,7 +73,6 @@ fun DrinkPage(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate(DrinkListRoute) }) {

@@ -56,6 +56,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -235,22 +236,17 @@ fun DrinkListPage(
         Scaffold(
             modifier = modifier,
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     colors = topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     ),
                     title = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
                             Text(
                                 "Menu",
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                        }
                     },
                     navigationIcon = {
                         IconButton(onClick = {
