@@ -14,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.macieandrz.barbook.ui.theme.BarBookTheme
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
+import com.macieandrz.barbook.viewModel.ShopListViewModel
 
 class MainActivity : ComponentActivity() {
-  private val drinkListViewModel by viewModels<DrinkListViewModel>()
+    private val drinkListViewModel by viewModels<DrinkListViewModel>()
+    private val shopListViewModel by viewModels<ShopListViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,10 +28,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
           Navigation(
               modifier = Modifier.padding(innerPadding),
-              drinkListViewModel = drinkListViewModel
-
+              drinkListViewModel = drinkListViewModel,
+              shopListViewModel = shopListViewModel
           )
-
                 }
             }
         }

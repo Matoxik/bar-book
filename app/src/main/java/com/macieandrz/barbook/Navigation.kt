@@ -16,11 +16,13 @@ import com.macieandrz.barbook.pages.HomeRoute
 import com.macieandrz.barbook.pages.ShopListPage
 import com.macieandrz.barbook.pages.ShopListRoute
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
+import com.macieandrz.barbook.viewModel.ShopListViewModel
 
 @Composable
 fun Navigation(
     modifier: Modifier = Modifier,
-    drinkListViewModel: DrinkListViewModel
+    drinkListViewModel: DrinkListViewModel,
+    shopListViewModel: ShopListViewModel
 
 ) {
     val navController = rememberNavController()
@@ -38,7 +40,7 @@ fun Navigation(
            DrinkPage(modifier, navController, drinkListViewModel)
         }
         composable<ShopListRoute> {
-            ShopListPage(modifier, navController, drinkListViewModel)
+            ShopListPage(modifier, navController, shopListViewModel)
         }
         composable<ChallengeRoute> {
             ChallengePage(modifier, navController, drinkListViewModel)

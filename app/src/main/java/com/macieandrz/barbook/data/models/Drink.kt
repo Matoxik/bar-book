@@ -24,7 +24,7 @@ data class Drink(
     val strDrink: String,
 
     @Json(name = "strDrinkAlternate")
-    val strDrinkAlternate: Any?,
+    val strDrinkAlternate: String?,
 
     @Json(name = "strDrinkThumb")
     val strDrinkThumb: String?,
@@ -111,22 +111,22 @@ data class Drink(
     val strMeasure1: String?,
 
     @Json(name = "strMeasure10")
-    val strMeasure10: Any?,
+    val strMeasure10: String?,
 
     @Json(name = "strMeasure11")
-    val strMeasure11: Any?,
+    val strMeasure11: String?,
 
     @Json(name = "strMeasure12")
-    val strMeasure12: Any?,
+    val strMeasure12: String?,
 
     @Json(name = "strMeasure13")
-    val strMeasure13: Any?,
+    val strMeasure13: String?,
 
     @Json(name = "strMeasure14")
-    val strMeasure14: Any?,
+    val strMeasure14: String?,
 
     @Json(name = "strMeasure15")
-    val strMeasure15: Any?,
+    val strMeasure15: String?,
 
     @Json(name = "strMeasure2")
     val strMeasure2: String?,
@@ -147,14 +147,14 @@ data class Drink(
     val strMeasure7: String?,
 
     @Json(name = "strMeasure8")
-    val strMeasure8: Any?,
+    val strMeasure8: String?,
 
     @Json(name = "strMeasure9")
-    val strMeasure9: Any?,
+    val strMeasure9: String?,
 
     @Json(name = "strTags")
     val strTags: String?,
 
     @Json(name = "strVideo")
-    val strVideo: Any?
+    val strVideo: String?
 )
