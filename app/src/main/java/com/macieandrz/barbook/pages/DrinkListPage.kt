@@ -48,8 +48,10 @@ import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import kotlinx.serialization.Serializable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
@@ -69,6 +71,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import com.macieandrz.barbook.data.models.DrinkList
 import kotlinx.coroutines.launch
 
 @Serializable
@@ -93,7 +96,8 @@ fun DrinkListPage(
     var selectedIngredient by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
-
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     LaunchedEffect(Unit) {
         drinkListViewModel.performFetchAllDrinkList("a")
@@ -158,7 +162,8 @@ fun DrinkListPage(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
-                    val ingredientOptions = listOf("Vodka", "Rum", "Tequila", "Bourbon", "Red wine", "Whiskey", "None")
+                    val ingredientOptions =
+                        listOf("Vodka", "Rum", "Tequila", "Bourbon", "Red wine", "Whiskey", "None")
                     ingredientOptions.forEach { option ->
                         Row(
                             modifier = Modifier
@@ -223,7 +228,11 @@ fun DrinkListPage(
                     Button(
                         onClick = {
                             // Wywołanie funkcji filtrowania
-                            drinkListViewModel.performFetchFilteredDrinkList(selectedAlcohol, selectedCategory, selectedIngredient)
+                            drinkListViewModel.performFetchFilteredDrinkList(
+                                selectedAlcohol,
+                                selectedCategory,
+                                selectedIngredient
+                            )
                             // Zamknięcie navigation drawer
                             scope.launch {
                                 drawerState.close()
@@ -245,11 +254,11 @@ fun DrinkListPage(
                         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     ),
                     title = {
-                            Text(
-                                "Menu",
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                        Text(
+                            "Menu",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
@@ -281,118 +290,173 @@ fun DrinkListPage(
             },
             bottomBar = {
                 BottomNavigationBar(
+
                     navController = navController,
                     actualPosition = "DrinkListPage"
                 )
             }
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Pole wyszukiwania nazwy drinka
-                TextField(
-                    value = drinkName,
-                    onValueChange = { drinkName = it },
-                    label = { Text("Drink name") },
+            if (isLandscape) {
+                // Układ poziomy - elementy wyszukiwania po lewej, siatka po prawej
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
+                        .padding(paddingValues)
                         .padding(16.dp)
-                )
-
-                // Przycisk wyszukiwania
-                Button(
-                    onClick = {
-                        if (drinkName.isNotBlank()) {
-                            drinkListViewModel.performFetchDrinkList(drinkName)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
                 ) {
-                    Text("Search")
-                }
-
-                // Wyświetlanie siatki drinków
-                drinkList?.drinks?.let { drinks ->
-                    if (drinks.isNotEmpty()) {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            contentPadding = PaddingValues(8.dp),
-                        ) {
-                            items(drinks) { drink ->
-                                DrinkCard(
-                                    drink = drink,
-                                    navController = navController,
-                                    drinkListViewModel = drinkListViewModel
-                                )
-                            }
-                        }
-                    } else {
-                        Text(
-                            text = "No drinks found",
+                    // Lewa strona - wyszukiwanie
+                    Column(
+                        modifier = Modifier
+                            .weight(0.3f)
+                            .fillMaxHeight()
+                            .padding(end = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TextField(
+                            value = drinkName,
+                            onValueChange = { drinkName = it },
+                            label = { Text("Drink name") },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center
+                                .padding(bottom = 16.dp)
                         )
+
+                        Button(
+                            onClick = {
+                                if (drinkName.isNotBlank()) {
+                                    drinkListViewModel.performFetchDrinkList(drinkName)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Search")
+                        }
                     }
+
+                    // Prawa strona - siatka drinków
+                    Box(
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .fillMaxHeight()
+                            .padding(start = 8.dp)
+                    ) {
+                        DisplayDrinkGrid(drinkList, navController, drinkListViewModel)
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextField(
+                        value = drinkName,
+                        onValueChange = { drinkName = it },
+                        label = { Text("Drink name") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+
+                    Button(
+                        onClick = {
+                            if (drinkName.isNotBlank()) {
+                                drinkListViewModel.performFetchDrinkList(drinkName)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text("Search")
+                    }
+
+                    DisplayDrinkGrid(drinkList, navController, drinkListViewModel)
                 }
             }
         }
     }
 }
 
-
-    @Composable
-    fun DrinkCard(
-        drink: Drink,
-        navController: NavController,
-        drinkListViewModel: DrinkListViewModel
-    ) {
-        Card(
-            modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth()
-                .heightIn(min = 180.dp),
-            shape = RoundedCornerShape(8.dp),
-            onClick = {
-                navController.navigate(DrinkRoute)
-                drinkListViewModel.setCurrentDrink(drink.strDrink)
-            }
-
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+@Composable
+private fun DisplayDrinkGrid(
+    drinkList: DrinkList?,
+    navController: NavController,
+    drinkListViewModel: DrinkListViewModel
+) {
+    drinkList?.drinks?.let { drinks ->
+        if (drinks.isNotEmpty()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                contentPadding = PaddingValues(8.dp),
             ) {
-                // Wyświetlanie zdjęcia drinka
-                drink.strDrinkThumb?.let { imageUrl ->
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = drink.strDrink,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f),
-                        contentScale = ContentScale.Crop
+                items(drinks) { drink ->
+                    DrinkCard(
+                        drink = drink,
+                        navController = navController,
+                        drinkListViewModel = drinkListViewModel
                     )
                 }
-
-
-                // Wyświetlanie nazwy drinka
-                Text(
-                    text = drink.strDrink,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    textAlign = TextAlign.Center
-                )
             }
+        } else {
+            Text(
+                text = "No drinks found",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textAlign = TextAlign.Center
+            )
         }
     }
+}
+
+@Composable
+fun DrinkCard(
+    drink: Drink,
+    navController: NavController,
+    drinkListViewModel: DrinkListViewModel
+) {
+    Card(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .heightIn(min = 180.dp),
+        shape = RoundedCornerShape(8.dp),
+        onClick = {
+            navController.navigate(DrinkRoute)
+            drinkListViewModel.setCurrentDrink(drink.strDrink)
+        }
+
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Wyświetlanie zdjęcia drinka
+            drink.strDrinkThumb?.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = drink.strDrink,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+
+            // Wyświetlanie nazwy drinka
+            Text(
+                text = drink.strDrink,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}

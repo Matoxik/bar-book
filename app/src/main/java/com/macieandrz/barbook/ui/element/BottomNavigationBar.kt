@@ -1,5 +1,6 @@
 package com.macieandrz.barbook.ui.element
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.macieandrz.barbook.pages.ChallengeRoute
@@ -53,8 +55,12 @@ fun BottomNavigationBar(
     navController: NavController,
     actualPosition: String
 ) {
-    NavigationBar(modifier = modifier,
-        windowInsets = WindowInsets(0, 0, 0, 144)
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    NavigationBar(modifier = modifier.padding(bottom =  if (!isLandscape) {48.dp} else {0.dp}),
+        windowInsets = WindowInsets(0, 0, 0,   0)
     ) {
         // Home
         NavigationBarItem(

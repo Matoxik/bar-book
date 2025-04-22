@@ -1,6 +1,7 @@
 package com.macieandrz.barbook.viewModel
 
 import android.app.Application
+import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
@@ -17,10 +18,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 
 // Helper data classes for managing drinks and ingredients
-data class DrinkWithPortions(val drink: Drink, var portions: Int = 1)
-data class ShoppingIngredient(val name: String, val measure: String, var isChecked: Boolean = false)
+@Parcelize
+data class DrinkWithPortions(val drink: Drink, var portions: Int = 1) : Parcelable
+@Parcelize
+data class ShoppingIngredient(val name: String, val measure: String, var isChecked: Boolean = false) :
+    Parcelable
 
 class ShopListViewModel(
     app: Application,
@@ -37,26 +42,15 @@ class ShopListViewModel(
         private set
 
     @OptIn(SavedStateHandleSaveableApi::class)
-    var selectedDrinks by savedStateHandle.saveable(
-        stateSaver = listSaver(
-            save = { it.toList() },
-            restore = { it.toList() }
-        )
-    ) {
+    var selectedDrinks by savedStateHandle.saveable {
         mutableStateOf(listOf<DrinkWithPortions>())
     }
-        private set
 
     @OptIn(SavedStateHandleSaveableApi::class)
-    var shoppingIngredients by savedStateHandle.saveable(
-        stateSaver = listSaver(
-            save = { it.toList() },
-            restore = { it.toList() }
-        )
-    ) {
+    var shoppingIngredients by savedStateHandle.saveable {
         mutableStateOf(listOf<ShoppingIngredient>())
     }
-        private set
+
 
     // Methods to update the state
     fun updateDrinkName(name: String) {
@@ -107,9 +101,11 @@ class ShopListViewModel(
                     Log.d("DEBUG", "Fetched drink data: $drinkName")
                     if (data != null) {
                         _drinkList.update { data }
+
                         data.drinks?.firstOrNull()?.let { newDrink ->
                             addDrink(DrinkWithPortions(newDrink))
                         }
+
                     }
                 }
                 drinkName = ""

@@ -1,6 +1,7 @@
 package com.macieandrz.barbook.pages
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,7 +81,7 @@ fun ChallengePage(
     navController: NavController,
     challengeViewModel: ChallengeViewModel
 ) {
-    // Zmienne stanu UI
+    // State variables remain unchanged
     var selectedDrink by rememberSaveable { mutableStateOf("") }
     var playerName by rememberSaveable { mutableStateOf("") }
     var isTimerRunning by rememberSaveable { mutableStateOf(false) }
@@ -88,7 +90,7 @@ fun ChallengePage(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // Pobieranie danych leaderboardu
+    // Leaderboard and timer logic remain unchanged
     val leaderboard by produceState<List<Player>>(
         initialValue = emptyList(),
         key1 = selectedDrink
@@ -100,18 +102,18 @@ fun ChallengePage(
         }
     }
 
-    // Konfiguracja konfetti
+    // Konfetti configuration remains unchanged
     val party = Party(
         speed = 0f,
         maxSpeed = 30f,
         damping = 0.9f,
         spread = 360,
         colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def),
-        position = Position.Relative(0.5,0.2),
+        position = Position.Relative(0.5, 0.2),
         emitter = Emitter(duration = 140, TimeUnit.MILLISECONDS).max(110)
     )
 
-    // Logika minutnika
+    // Timer logic remains unchanged
     LaunchedEffect(key1 = isTimerRunning) {
         if (isTimerRunning) {
             while (isTimerRunning) {
@@ -120,6 +122,10 @@ fun ChallengePage(
             }
         }
     }
+
+    // Get the current orientation
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
         topBar = {
@@ -144,15 +150,12 @@ fun ChallengePage(
             )
         },
         floatingActionButton = {
-            // Dodajemy FAB, widoczny tylko gdy jest wybrany drink
+            // FAB remains unchanged
             if (selectedDrink.isNotEmpty()) {
                 SmallFloatingActionButton(
-
                     onClick = {
-                        // Czyszczenie leaderboardu dla wybranego drinka
                         scope.launch {
                             challengeViewModel.deletePlayersByDrink(selectedDrink)
-                            // Pokazanie komunikatu dla użytkownika
                             Toast.makeText(
                                 context,
                                 "Cleaned leaderboard for $selectedDrink",
@@ -172,167 +175,329 @@ fun ChallengePage(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-
-            // Wybór drinka
-            DrinkSelector(
-                selectedDrink = selectedDrink,
-                onDrinkSelected = { selectedDrink = it }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Wprowadzanie imienia gracza
-            OutlinedTextField(
-                value = playerName,
-                onValueChange = { playerName = it },
-                label = { Text("Player name") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tablica wyników (Leaderboard)
-            LeaderboardSection(
-                leaderboard = leaderboard,
-                drinkName = selectedDrink
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Wyświetlanie czasu
-            Text(
-                text = formatTime(seconds),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Przyciski sterowania minutnikiem
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                // Przycisk Start
-                IconButton(
-                    onClick = {
-                        if (!isTimerRunning && playerName.isNotBlank() && selectedDrink.isNotBlank()) {
-                            isTimerRunning = true
-                        } else if (playerName.isBlank()) {
-                            Toast.makeText(
-                                context,
-                                "Give player name", Toast.LENGTH_SHORT
-                            ).show()
-                        } else if (selectedDrink.isBlank()) {
-                            Toast.makeText(
-                                context,
-                                "Choose drink", Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
+            // Change layout based on orientation
+            if (isLandscape) {
+                // Landscape layout with two columns side by side
+                Row(
                     modifier = Modifier
-                        .size(60.dp)
-                        .background(
-                            if (!isTimerRunning) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape
-                        )
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Start",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    // Left column: Drink selection and player name
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(end = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            DrinkSelector(
+                                selectedDrink = selectedDrink,
+                                onDrinkSelected = { selectedDrink = it }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+
+                        item {
+                            OutlinedTextField(
+                                value = playerName,
+                                onValueChange = { playerName = it },
+                                label = { Text("Player name") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // Leaderboard
+                        item {
+                            LeaderboardSection(
+                                leaderboard = leaderboard,
+                                drinkName = selectedDrink
+                            )
+                    }
+
+
                 }
 
-                // Przycisk Stop
-                IconButton(
-                    onClick = {
-                        if (isTimerRunning) {
-                            isTimerRunning = false
+                    // Right column: Timer, controls and leaderboard
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(start = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = formatTime(seconds),
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                            // Zapisanie czasu do bazy danych
-                            if (playerName.isNotBlank() && selectedDrink.isNotBlank() && seconds > 0) {
-                                val timeString = formatTime(seconds)
-                                val player = Player(
-                                    name = playerName,
-                                    time = timeString,
-                                    drink = selectedDrink
-                                )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                                // Sprawdzenie czy to rekordowy czas
-                                val isRecordTime = leaderboard.isEmpty() ||
-                                        leaderboard.sortedBy { parseTimeToSeconds(it.time) }
-                                            .firstOrNull()
-                                            ?.let { parseTimeToSeconds(it.time) > seconds } == true
 
-                                // Pokazanie konfetti dla rekordowego czasu
-                                if (isRecordTime) {
-                                    showKonfetti = true
-                                    scope.launch {
-                                        delay(3000)
-                                        showKonfetti = false
+                        // Control buttons (Start, Stop)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            // Start button
+                            IconButton(
+                                onClick = {
+                                    if (!isTimerRunning && playerName.isNotBlank() && selectedDrink.isNotBlank()) {
+                                        isTimerRunning = true
+                                    } else if (playerName.isBlank()) {
+                                        Toast.makeText(
+                                            context,
+                                            "Give player name", Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else if (selectedDrink.isBlank()) {
+                                        Toast.makeText(
+                                            context,
+                                            "Choose drink", Toast.LENGTH_SHORT
+                                        ).show()
                                     }
-                                }
+                                },
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .background(
+                                        if (!isTimerRunning) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Start",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
 
-                                // Zapis do bazy danych
-                                scope.launch {
-                                    challengeViewModel.savePlayer(player)
-                                }
+                            // Stop button
+                            IconButton(
+                                onClick = {
+                                    if (isTimerRunning) {
+                                        isTimerRunning = false
+                                        if (playerName.isNotBlank() && selectedDrink.isNotBlank() && seconds > 0) {
+                                            val timeString = formatTime(seconds)
+                                            val player = Player(
+                                                name = playerName,
+                                                time = timeString,
+                                                drink = selectedDrink
+                                            )
+
+                                            val isRecordTime = leaderboard.isEmpty() ||
+                                                    leaderboard.sortedBy { parseTimeToSeconds(it.time) }
+                                                        .firstOrNull()
+                                                        ?.let { parseTimeToSeconds(it.time) > seconds } == true
+
+                                            if (isRecordTime) {
+                                                showKonfetti = true
+                                                scope.launch {
+                                                    delay(3000)
+                                                    showKonfetti = false
+                                                }
+                                            }
+
+                                            scope.launch {
+                                                challengeViewModel.savePlayer(player)
+                                            }
+                                        }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .background(
+                                        if (isTimerRunning) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Stop,
+                                    contentDescription = "Stop",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
                             }
                         }
-                    },
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Reset button
+                        Button(
+                            onClick = {
+                                seconds = 0
+                                isTimerRunning = false
+                            },
+                            modifier = Modifier.fillMaxWidth(0.5f)
+                        ) {
+                            Text("Reset")
+                        }
+
+
+
+
+                    }
+                }
+            } else {
+                // Portrait layout remains unchanged
+                Column(
                     modifier = Modifier
-                        .size(60.dp)
-                        .background(
-                            if (isTimerRunning) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape
-                        )
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Stop,
-                        contentDescription = "Stop",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                    // Keep original vertical layout
+                    DrinkSelector(
+                        selectedDrink = selectedDrink,
+                        onDrinkSelected = { selectedDrink = it }
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = playerName,
+                        onValueChange = { playerName = it },
+                        label = { Text("Player name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LeaderboardSection(
+                        leaderboard = leaderboard,
+                        drinkName = selectedDrink
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = formatTime(seconds),
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Control buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        // Start button
+                        IconButton(
+                            onClick = {
+                                if (!isTimerRunning && playerName.isNotBlank() && selectedDrink.isNotBlank()) {
+                                    isTimerRunning = true
+                                } else if (playerName.isBlank()) {
+                                    Toast.makeText(
+                                        context,
+                                        "Give player name", Toast.LENGTH_SHORT
+                                    ).show()
+                                } else if (selectedDrink.isBlank()) {
+                                    Toast.makeText(
+                                        context,
+                                        "Choose drink", Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            },
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(
+                                    if (!isTimerRunning) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Start",
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        // Stop button
+                        IconButton(
+                            onClick = {
+                                if (isTimerRunning) {
+                                    isTimerRunning = false
+                                    if (playerName.isNotBlank() && selectedDrink.isNotBlank() && seconds > 0) {
+                                        val timeString = formatTime(seconds)
+                                        val player = Player(
+                                            name = playerName,
+                                            time = timeString,
+                                            drink = selectedDrink
+                                        )
+
+                                        val isRecordTime = leaderboard.isEmpty() ||
+                                                leaderboard.sortedBy { parseTimeToSeconds(it.time) }
+                                                    .firstOrNull()
+                                                    ?.let { parseTimeToSeconds(it.time) > seconds } == true
+
+                                        if (isRecordTime) {
+                                            showKonfetti = true
+                                            scope.launch {
+                                                delay(3000)
+                                                showKonfetti = false
+                                            }
+                                        }
+
+                                        scope.launch {
+                                            challengeViewModel.savePlayer(player)
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(
+                                    if (isTimerRunning) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Stop,
+                                contentDescription = "Stop",
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            seconds = 0
+                            isTimerRunning = false
+                        },
+                        modifier = Modifier.fillMaxWidth(0.5f)
+                    ) {
+                        Text("Reset")
+                    }
+
+
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
 
-            // Przycisk Reset
-            Button(
-                onClick = {
-                    seconds = 0
-                    isTimerRunning = false
-                },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text("Reset")
+            // Konfetti animation
+            if (showKonfetti) {
+                KonfettiView(
+                    modifier = Modifier.fillMaxSize(),
+                    parties = listOf(party)
+                )
             }
-
-
         }
-        // Animacja konfetti
-        if (showKonfetti) {
-            KonfettiView(
-                modifier = Modifier.fillMaxSize(),
-                parties = listOf(party)
-            )
-        }
-    }
     }
 }
+
 
 @Composable
 fun DrinkSelector(

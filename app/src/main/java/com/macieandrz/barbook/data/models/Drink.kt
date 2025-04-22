@@ -1,9 +1,12 @@
 package com.macieandrz.barbook.data.models
 
+import android.os.Parcelable
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.Parcelize
 
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class Drink(
     @Json(name = "dateModified")
     val dateModified: String?,
@@ -102,10 +105,10 @@ data class Drink(
     val strInstructionsIT: String?,
 
     @Json(name = "strInstructionsZH-HANS")
-    val strInstructionsZHHANS: Any?,
+    val strInstructionsZHHANS: String?,
 
     @Json(name = "strInstructionsZH-HANT")
-    val strInstructionsZHHANT: Any?,
+    val strInstructionsZHHANT: String?,
 
     @Json(name = "strMeasure1")
     val strMeasure1: String?,
@@ -157,4 +160,4 @@ data class Drink(
 
     @Json(name = "strVideo")
     val strVideo: String?
-)
+) : Parcelable

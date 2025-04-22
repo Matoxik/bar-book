@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -55,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,7 +85,6 @@ fun ShopListPage(
     navController: NavController,
     shopListViewModel: ShopListViewModel
 ) {
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -92,11 +93,11 @@ fun ShopListPage(
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 title = {
-                        Text(
-                            "Shopping list",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Text(
+                        "Shopping list",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             )
         },
@@ -106,7 +107,7 @@ fun ShopListPage(
                 onClick = {
                     sendUncheckedIngredientsViaSMS(context, shopListViewModel.shoppingIngredients)
                 },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ) {
                 Icon(
@@ -122,52 +123,122 @@ fun ShopListPage(
             )
         }
     ) { paddingValues ->
-     Box( modifier = Modifier
-         .fillMaxSize()
-         .padding(paddingValues)) {
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            // Drink search and add section
-            Column(modifier = Modifier.padding(16.dp)) {
-                TextField(
-                    value = shopListViewModel.drinkName,
-                    onValueChange = { shopListViewModel.updateDrinkName(it) },
-                    label = { Text("Drink name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Get current orientation
+            val configuration = LocalConfiguration.current
+            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { shopListViewModel.performFetchDrinkList() },
-                    modifier = Modifier.fillMaxWidth()
+            if (isLandscape) {
+                // Landscape layout - Row with ingredients on left, drinks on right
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
                 ) {
-                    Text("Add")
+                    // Left side - Drink search and DrinksList
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(0.6f)
+                            .padding(start = 8.dp)
+                    ) {
+                        // Drink search section
+                        item {
+                            Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                                TextField(
+                                    value = shopListViewModel.drinkName,
+                                    onValueChange = { shopListViewModel.updateDrinkName(it) },
+                                    label = { Text("Drink name") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Button(
+                                    onClick = { shopListViewModel.performFetchDrinkList() },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Add")
+                                }
+                            }
+                        }
+                        item {
+                            // DrinksList
+                            DrinksList(
+                                selectedDrinks = shopListViewModel.selectedDrinks,
+                                onRemoveDrink = { drink ->
+                                    shopListViewModel.removeDrink(drink)
+                                },
+                                onUpdatePortions = { drink, newPortions ->
+                                    shopListViewModel.updateDrinkPortions(drink, newPortions)
+                                }
+                            )
+                        }
+                    }
+                    // Right side - RequiredIngredientsCard
+                    Box(
+                        modifier = Modifier
+                            .weight(0.4f)
+                            .padding(end = 8.dp)
+                    ) {
+                        RequiredIngredientsCard(
+                            ingredients = shopListViewModel.shoppingIngredients,
+                            onCheckedChange = { ingredient, isChecked ->
+                                shopListViewModel.updateIngredientChecked(ingredient, isChecked)
+                            }
+                        )
+                    }
+
+                }
+            } else {
+                // Portrait layout - original vertical arrangement
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    // Drink search section
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        TextField(
+                            value = shopListViewModel.drinkName,
+                            onValueChange = { shopListViewModel.updateDrinkName(it) },
+                            label = { Text("Drink name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { shopListViewModel.performFetchDrinkList() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Add")
+                        }
+                    }
+
+                    // DrinksList
+                    DrinksList(
+                        selectedDrinks = shopListViewModel.selectedDrinks,
+                        onRemoveDrink = { drink ->
+                            shopListViewModel.removeDrink(drink)
+                        },
+                        onUpdatePortions = { drink, newPortions ->
+                            shopListViewModel.updateDrinkPortions(drink, newPortions)
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // RequiredIngredientsCard
+                    RequiredIngredientsCard(
+                        ingredients = shopListViewModel.shoppingIngredients,
+                        onCheckedChange = { ingredient, isChecked ->
+                            shopListViewModel.updateIngredientChecked(ingredient, isChecked)
+                        }
+                    )
                 }
             }
-
-            // Lista drinków używająca stanów z ViewModelu
-            DrinksList(
-                selectedDrinks = shopListViewModel.selectedDrinks,
-                onRemoveDrink = { drink ->
-                    shopListViewModel.removeDrink(drink)
-                },
-                onUpdatePortions = { drink, newPortions ->
-                    shopListViewModel.updateDrinkPortions(drink, newPortions)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Karta składników używająca stanów z ViewModelu
-            RequiredIngredientsCard(
-                ingredients = shopListViewModel.shoppingIngredients,
-                onCheckedChange = { ingredient, isChecked ->
-                    shopListViewModel.updateIngredientChecked(ingredient, isChecked)
-                }
-            )
-         }
         }
     }
 }
@@ -228,7 +299,8 @@ fun DrinksList(
                                     horizontalArrangement = Arrangement.End,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    val imageVector = ImageVector.vectorResource(id = R.drawable.baseline_delete)
+                                    val imageVector =
+                                        ImageVector.vectorResource(id = R.drawable.baseline_delete)
                                     Icon(imageVector = imageVector, contentDescription = null)
                                 }
 
@@ -263,7 +335,10 @@ fun DrinksList(
                                         Button(
                                             onClick = {
                                                 if (drinkWithPortions.portions > 1) {
-                                                    onUpdatePortions(drinkWithPortions, drinkWithPortions.portions - 1)
+                                                    onUpdatePortions(
+                                                        drinkWithPortions,
+                                                        drinkWithPortions.portions - 1
+                                                    )
                                                 }
                                             },
                                             modifier = Modifier.size(40.dp),
@@ -280,7 +355,10 @@ fun DrinksList(
 
                                         Button(
                                             onClick = {
-                                                onUpdatePortions(drinkWithPortions, drinkWithPortions.portions + 1)
+                                                onUpdatePortions(
+                                                    drinkWithPortions,
+                                                    drinkWithPortions.portions + 1
+                                                )
                                             },
                                             modifier = Modifier.size(40.dp),
                                             contentPadding = PaddingValues(0.dp)
