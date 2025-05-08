@@ -1,11 +1,8 @@
 package com.macieandrz.barbook.pages
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,18 +36,9 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,19 +48,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.macieandrz.barbook.R
 import com.macieandrz.barbook.ui.element.BottomNavigationBar
-import com.macieandrz.barbook.viewModel.DrinkListViewModel
 import com.macieandrz.barbook.viewModel.DrinkWithPortions
 import com.macieandrz.barbook.viewModel.ShopListViewModel
 import com.macieandrz.barbook.viewModel.ShoppingIngredient
 import kotlinx.serialization.Serializable
-import androidx.core.net.toUri
 
 @Serializable
 object ShopListRoute
@@ -451,7 +434,7 @@ private fun sendUncheckedIngredientsViaSMS(
     ingredients: List<ShoppingIngredient>
 ) {
 
-    // Filtruj tylko niezaznaczone składniki
+    // Filter only unchecked components
     val uncheckedIngredients = ingredients.filter { !it.isChecked }
 
     if (uncheckedIngredients.isEmpty()) {
@@ -463,7 +446,7 @@ private fun sendUncheckedIngredientsViaSMS(
         return
     }
 
-    // Budowanie treści SMS
+    // Building SMS content
     val smsBody = buildString {
         append("Lista zakupów:\n")
         uncheckedIngredients.forEachIndexed { index, ingredient ->
@@ -472,7 +455,7 @@ private fun sendUncheckedIngredientsViaSMS(
     }
 
     try {
-        // Użycie Intenta do otwarcia aplikacji SMS z gotową treścią
+        // Using Intent to open SMS application with ready content
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = "sms:".toUri()
             putExtra("sms_body", smsBody)

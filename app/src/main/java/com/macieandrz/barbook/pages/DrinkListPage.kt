@@ -1,41 +1,60 @@
 package com.macieandrz.barbook.pages
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,36 +62,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.macieandrz.barbook.data.models.Drink
+import com.macieandrz.barbook.data.models.DrinkList
 import com.macieandrz.barbook.ui.element.BottomNavigationBar
 import com.macieandrz.barbook.viewModel.DrinkListViewModel
-import kotlinx.serialization.Serializable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
-import com.macieandrz.barbook.data.models.DrinkList
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 @Serializable
 object DrinkListRoute
@@ -106,6 +100,7 @@ fun DrinkListPage(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
+          // Navigation drawer
             ModalDrawerSheet(
                 drawerContainerColor = MaterialTheme.colorScheme.background
             ) {
@@ -121,7 +116,7 @@ fun DrinkListPage(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Sekcja 1: Alcohol
+                    // Section 1: Alcohol
                     Text(
                         "Alcohol",
                         fontSize = 18.sp,
@@ -154,7 +149,7 @@ fun DrinkListPage(
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    // Sekcja 2: Ingredients
+                    // Section 2: Ingredients
                     Text(
                         "Ingredients",
                         fontSize = 18.sp,
@@ -188,7 +183,7 @@ fun DrinkListPage(
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    // Sekcja 3: Category
+                    // Section 3: Category
                     Text(
                         "Category",
                         fontSize = 18.sp,
@@ -224,16 +219,14 @@ fun DrinkListPage(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Przycisk "Filter"
+
                     Button(
                         onClick = {
-                            // Wywołanie funkcji filtrowania
                             drinkListViewModel.performFetchFilteredDrinkList(
                                 selectedAlcohol,
                                 selectedCategory,
                                 selectedIngredient
                             )
-                            // Zamknięcie navigation drawer
                             scope.launch {
                                 drawerState.close()
                             }
@@ -281,7 +274,7 @@ fun DrinkListPage(
                                     imageVector = Icons.Filled.Menu,
                                     contentDescription = "Menu Icon",
                                     modifier = Modifier.size(32.dp),
-                                    tint = MaterialTheme.colorScheme.surfaceTint //onSecondary
+                                    tint = MaterialTheme.colorScheme.surfaceTint
                                 )
                             }
                         }
@@ -297,14 +290,14 @@ fun DrinkListPage(
             }
         ) { paddingValues ->
             if (isLandscape) {
-                // Układ poziomy - elementy wyszukiwania po lewej, siatka po prawej
+                // Horizontal layout - search items on the left, grid on the right
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(16.dp)
                 ) {
-                    // Lewa strona - wyszukiwanie
+                    // Left side - search
                     Column(
                         modifier = Modifier
                             .weight(0.3f)
@@ -333,7 +326,7 @@ fun DrinkListPage(
                         }
                     }
 
-                    // Prawa strona - siatka drinków
+                    // Right side - a grid of drinks
                     Box(
                         modifier = Modifier
                             .weight(0.7f)
@@ -436,7 +429,7 @@ fun DrinkCard(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Wyświetlanie zdjęcia drinka
+            // Displaying a picture of a drink
             drink.strDrinkThumb?.let { imageUrl ->
                 AsyncImage(
                     model = imageUrl,
@@ -449,7 +442,7 @@ fun DrinkCard(
             }
 
 
-            // Wyświetlanie nazwy drinka
+            // Displaying the name of the drink
             Text(
                 text = drink.strDrink,
                 modifier = Modifier

@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
@@ -29,7 +28,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +36,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,7 +78,7 @@ fun ChallengePage(
     navController: NavController,
     challengeViewModel: ChallengeViewModel
 ) {
-    // State variables remain unchanged
+    // State variables
     var selectedDrink by rememberSaveable { mutableStateOf("") }
     var playerName by rememberSaveable { mutableStateOf("") }
     var isTimerRunning by rememberSaveable { mutableStateOf(false) }
@@ -90,7 +87,7 @@ fun ChallengePage(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // Leaderboard and timer logic remain unchanged
+    // Leaderboard and timer logic
     val leaderboard by produceState<List<Player>>(
         initialValue = emptyList(),
         key1 = selectedDrink
@@ -102,7 +99,7 @@ fun ChallengePage(
         }
     }
 
-    // Konfetti configuration remains unchanged
+    // Konfetti configuration
     val party = Party(
         speed = 0f,
         maxSpeed = 30f,
@@ -113,7 +110,7 @@ fun ChallengePage(
         emitter = Emitter(duration = 140, TimeUnit.MILLISECONDS).max(110)
     )
 
-    // Timer logic remains unchanged
+    // Timer logic
     LaunchedEffect(key1 = isTimerRunning) {
         if (isTimerRunning) {
             while (isTimerRunning) {
@@ -150,7 +147,6 @@ fun ChallengePage(
             )
         },
         floatingActionButton = {
-            // FAB remains unchanged
             if (selectedDrink.isNotEmpty()) {
                 SmallFloatingActionButton(
                     onClick = {
@@ -345,7 +341,7 @@ fun ChallengePage(
                     }
                 }
             } else {
-                // Portrait layout remains unchanged
+                // Portrait layout
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -353,7 +349,6 @@ fun ChallengePage(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Keep original vertical layout
                     DrinkSelector(
                         selectedDrink = selectedDrink,
                         onDrinkSelected = { selectedDrink = it }
@@ -578,7 +573,6 @@ fun LeaderboardSection(
                 )
             }
         } else {
-            // Nagłówek tabeli
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -596,7 +590,7 @@ fun LeaderboardSection(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Lista graczy
+            // Player list
             LazyColumn {
                 val sortedPlayers = leaderboard.sortedBy { parseTimeToSeconds(it.time) }.take(10)
                 items(sortedPlayers) { player ->
@@ -618,7 +612,7 @@ fun LeaderboardSection(
     }
 }
 
-// Funkcja formatująca czas
+// Time formatting function
 @SuppressLint("DefaultLocale")
 fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
@@ -626,7 +620,7 @@ fun formatTime(seconds: Int): String {
     return String.format("%02d:%02d", minutes, remainingSeconds)
 }
 
-// Funkcja parsująca string czasu na sekundy
+// Function that parses time string into seconds
 fun parseTimeToSeconds(timeString: String): Int {
     val parts = timeString.split(":")
     if (parts.size != 2) return Int.MAX_VALUE

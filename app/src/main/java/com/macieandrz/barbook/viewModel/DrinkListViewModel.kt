@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.macieandrz.barbook.data.models.Drink
 import com.macieandrz.barbook.data.models.DrinkList
 import com.macieandrz.barbook.data.models.FilteredDrinkList
 import com.macieandrz.barbook.data.models.toDrink
